@@ -84,7 +84,7 @@ setInterval(() => {
         chrome.webRequest.onBeforeRequest.removeListener(global.blocker);
     } else if (global.hours !== 0 || global.minutes !== 0) {
         chrome.tabs.query({}, (a) => {
-            let c = global.URLsRegex.testAll(a.map((b) => b.url));
+            let c = global.URLsRegex.testAll(a.map((b) => new URL(b.url).origin));
             if (c) {
                 if (!global.block && global.totalSeconds > 0) {
                     --global.totalSeconds;
