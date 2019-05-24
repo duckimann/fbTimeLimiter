@@ -29,12 +29,14 @@ chrome.storage.local.get("timer", ({timer: a}) => {
     for (let b in a) {
         global[b] = a[b];
     }
-});
 
-// Reset timer every day
-if (global.date !== new Date().toDateString()) {
-    global.totalSeconds = (global.hours * 60 * 60) + (global.minutes * 60);
-}
+    // Reset timer every day, just check at when extension start
+    let date = new Date().toDateString();
+    if (global.date !== date) {
+        global.date = date;
+        global.totalSeconds = (global.hours * 60 * 60) + (global.minutes * 60);
+    }
+});
 
 // Listen when timer change => change global object
 chrome.runtime.onMessage.addListener(() => {
@@ -45,9 +47,15 @@ chrome.runtime.onMessage.addListener(() => {
     });
 });
 
-// Do stuff in every seconds
+// Do stuff at every seconds
 setInterval(() => {
-    console.log(global);
+    // Check / set date at every seconds | if date different -> set new timer 
+    let date = new Date().toDateString();
+    global.date = date;
+    if (global.date !== date) {
+        global.date = date;
+        global.totalSeconds = (global.hours * 60 * 60) + (global.minutes * 60);
+    }
     chrome.storage.local.set({
         timer: {
             hours: global.hours,
