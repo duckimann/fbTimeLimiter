@@ -13,8 +13,10 @@ chrome.runtime.onInstalled.addListener(() => {
 let global = {
     block: false,
     blocker: () => ({cancel: true}),
-    blocked: false
+    blocked: false,
+    URLs: chrome.runtime.getManifest().permissions.filter((a) => a.includes("://"))
 };
+global.URLsRegex = global.URLs.map((a) => new RegExp(a.replace(/(\/\*$|\*:\/\/\*\.)/g, "").replace(".", "\\.")));
 function createNoti() {
     chrome.notifications.create({
         type: "basic",
@@ -22,6 +24,16 @@ function createNoti() {
         title: chrome.i18n.getMessage("extName"),
         message: chrome.i18n.getMessage("blockMessage")
     });
+}
+Array.prototype.testAll = function(data) {
+	switch(typeof(data)) {
+        case "string":
+			return !!this.filter((regex) => regex.test(data)).length;
+			break;
+        case "object":
+			return !!this.filter((regex) => !!data.filter((str) => regex.test(str)).length).length;
+			break;
+    }
 }
 
 // Get data from local storage
@@ -51,7 +63,6 @@ chrome.runtime.onMessage.addListener(() => {
 setInterval(() => {
     // Check / set date at every seconds | if date different -> set new timer 
     let date = new Date().toDateString();
-    global.date = date;
     if (global.date !== date) {
         global.date = date;
         global.totalSeconds = (global.hours * 60 * 60) + (global.minutes * 60);
@@ -73,8 +84,8 @@ setInterval(() => {
         chrome.webRequest.onBeforeRequest.removeListener(global.blocker);
     } else if (global.hours !== 0 || global.minutes !== 0) {
         chrome.tabs.query({}, (a) => {
-            let c = a.filter((b) => (b.url.includes("facebook.com") || b.url.includes("messenger.com")));
-            if (c.length > 0) {
+            let c = global.URLsRegex.testAll(a.map((b) => b.url));
+            if (c) {
                 if (!global.block && global.totalSeconds > 0) {
                     --global.totalSeconds;
                 } else if (global.block && global.totalSeconds > 0) {
@@ -87,7 +98,7 @@ setInterval(() => {
                 if (global.block && global.blocked == false) {
                     global.blocked = true;
                     createNoti();
-                    chrome.webRequest.onBeforeRequest.addListener(global.blocker, {urls: ["*://*.facebook.com/*", "*://*.messenger.com/*"], types: ["main_frame"]}, ["blocking"]);
+                    chrome.webRequest.onBeforeRequest.addListener(global.blocker, {urls: global.URLs, types: ["main_frame"]}, ["blocking"]);
                 } else if (!global.block) {
                     global.blocked = false;
                     chrome.webRequest.onBeforeRequest.removeListener(global.blocker);
