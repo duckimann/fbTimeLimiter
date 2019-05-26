@@ -4,7 +4,7 @@
 > Limit how long you can use Facebook on each day
 
 ## Affected URLs :smiling_imp:
-> \*.facebook.com/\*<br>\*.messenger.com/\*
+> \*.facebook.com/\*<br>\*.fbcdn.net/\*
 
 ## The timer runs on format hour:minute :joy:
 
