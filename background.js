@@ -26,14 +26,7 @@ function createNoti() {
     });
 }
 Array.prototype.testAll = function(data) {
-	switch(typeof(data)) {
-        case "string":
-			return !!this.filter((regex) => regex.test(data)).length;
-			break;
-        case "object":
-			return !!this.filter((regex) => !!data.filter((str) => regex.test(str)).length).length;
-			break;
-    }
+    return !!this.filter((regex) => (typeof(data) == "string") ? regex.test(data) : !!data.filter((str) => regex.test(str)).length).length;
 }
 
 // Get data from local storage

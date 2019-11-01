@@ -39,7 +39,7 @@ resources.parsedHtml.onchange = (a) => {
     timer.totalSeconds = (timer.hours * 60 * 60) + (timer.minutes * 60);
 
     chrome.storage.local.set({timer: timer});
-    chrome.runtime.sendMessage(chrome.runtime.id, "");
+    chrome.runtime.sendMessage("");
 };
 
 // Append Things...
